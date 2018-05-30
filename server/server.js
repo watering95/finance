@@ -1,20 +1,13 @@
 var express= require('express');
 var http = require('http');
+var path = require('path');
 
 var app = express();
 app.set('port', process.env.PORT || 3000);
 
-app.use('/script', express.static(__dirname + "/script"));
-app.use(function(req, res, next) {
-	res.writeHead('200', {'Content-Type':'text/html;charset=utf-8'});
-	res.write('<!DOCTYPE html>');
-	res.write('<html>');
-	res.write('<head>');
-	res.write('<script type="text/javascript" src="/script/test.js"></script>');
-	res.write('</head>');
-	res.write('<body>');
-	res.write('</body>');
-	res.end('</html>');
+app.use('/script',express.static(path.join(__dirname + '/../script')));
+app.get('/',function(req, res) {
+	res.send('이 서버는 나의 자산 어플의 정보 제공 목적으로 테스트 중입니다.');
 });
 
 http.createServer(app).listen(app.get('port'), function() {
