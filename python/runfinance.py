@@ -1,29 +1,36 @@
 import os
+import schedule
+import time
 import datetime
 from subprocess import call
 
 path = '''../db/finance.db'''
-if os.path.exists(path) == False:
-	cmd = '''python initfinance.py'''
-	cmd_args = cmd.split()
-	call(cmd_args)
-	f = open('log_finance.txt', 'w')
+
+def runProgram(cmd):
+	call(cmd.split())
+	return
+
+def log(data):
+	f = open('log_finance.txt', 'a')
 	f.write(datetime.datetime.now().isoformat())
-	f.write(' : init finance.db₩n')
+	f.write(data)
 	f.close()
-set_time = datetime.time(16, 0, 0)
+	return
+
+def job():
+	runProgram('''python updatefinance.py &''')
+	time.sleep(10)
+	runProgram('''python updategraph.py &''')
+	log(' : update finance.db, update graph\n')
+	return	
+		
+if os.path.exists(path) == False:
+	runProgram('''python initfinance.py &''')	
+	log(' : init finance.db\n')
 
 print('Start finance.py')
+schedule.every().day.at("17:40").do(job)
 
 while 1:
-	now_datetime = datetime.datetime.now()
-	now_time = now_datetime.time()
-	cmd = '''python updatefinance.py'''
-	cmd_args = cmd.split() 
-
-	if now_time == set_time: 
-		call(cmd_args)
-		f = open('log_finance.txt', 'w')
-		f.write(now_time.isoformat())
-		f.write(' : update finance.db₩n')
-		f.close()
+	schedule.run_pending()
+	time.sleep(1)
